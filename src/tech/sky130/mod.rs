@@ -27,10 +27,7 @@ pub(crate) mod layers;
 #[cfg(test)]
 mod tests;
 
-const SKY130_DRC_CONFIG_DATA: &str = include_str!(concat!(
-    env!("CARGO_MANIFEST_DIR"),
-    "/../tech/sky130/drc_config.yaml"
-));
+const SKY130_DRC_CONFIG_DATA: &str = include_str!("drc_config.yaml");
 
 fn tech_config() -> TechConfig {
     TechConfig::from_yaml(SKY130_DRC_CONFIG_DATA).expect("failed to load sky130A tech config")
