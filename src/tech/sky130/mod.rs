@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::sync::Arc;
 
+use layout21::raw::Dir;
 use layout21::raw::{
     Abstract, AbstractPort, BoundBoxTrait, Cell, Element, Instance, LayerKey, LayerPurpose, Layout,
     LayoutResult, Library, Point, Rect, Shape, Units,
@@ -11,9 +12,7 @@ use crate::config::{Int, Uint};
 use crate::{LayerIdx, PdkLib, Ref};
 
 use crate::contact::{Contact, ContactParams};
-use crate::geometry::{
-    expand_box, expand_box_min_width, rect_from_bbox, translate, CoarseDirection,
-};
+use crate::geometry::{expand_box, expand_box_min_width, rect_from_bbox, translate};
 use crate::mos::{LayoutTransistors, MosType};
 use crate::{
     config::TechConfig,
@@ -37,6 +36,7 @@ pub fn pdk() -> LayoutResult<Pdk> {
     Pdk::new(tech_config())
 }
 
+/// Creates a new [`PdkLib`] with a cell library of the given `name`.
 pub fn pdk_lib(name: impl Into<String>) -> LayoutResult<PdkLib> {
     Ok(PdkLib {
         tech: arcstr::literal!("sky130"),
@@ -139,7 +139,7 @@ impl Pdk {
         let gate_ctp = ContactParams::builder()
             .rows(1)
             .cols(1)
-            .dir(CoarseDirection::Horizontal)
+            .dir(Dir::Horiz)
             .stack("polyc".into())
             .build()
             .unwrap();
@@ -328,11 +328,11 @@ impl Pdk {
             let ose = tc.layer(ctlay_name).one_side_enclosure(lay_name);
 
             match params.dir {
-                CoarseDirection::Vertical => {
+                Dir::Vert => {
                     laybox.p0.y = std::cmp::min(laybox.p0.y, ct_bbox.p0.y - ose);
                     laybox.p1.y = std::cmp::max(laybox.p0.y, ct_bbox.p1.y + ose);
                 }
-                CoarseDirection::Horizontal => {
+                Dir::Horiz => {
                     laybox.p0.x = std::cmp::min(laybox.p0.x, ct_bbox.p0.x - ose);
                     laybox.p1.x = std::cmp::max(laybox.p0.x, ct_bbox.p1.x + ose);
                 }
@@ -385,7 +385,7 @@ impl Pdk {
             expand_box(&mut npc_box, tc.layer("licon").enclosure("npc"));
             elems.push(Element {
                 net: None,
-                layer: layers.keyname("nsdm").unwrap(),
+                layer: layers.keyname("npc").unwrap(),
                 purpose: LayerPurpose::Drawing,
                 inner: Shape::Rect(npc_box),
             });
