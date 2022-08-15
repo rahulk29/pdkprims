@@ -95,7 +95,7 @@ impl Pdk {
             };
 
             if d.mos_type == MosType::Pmos {
-                let mut psdm_box = rect.clone();
+                let mut psdm_box = rect;
                 expand_box(&mut psdm_box, tc.layer("diff").enclosure("psdm"));
                 elems.push(Element {
                     net: None,
@@ -104,7 +104,7 @@ impl Pdk {
                     inner: Shape::Rect(psdm_box),
                 });
 
-                let mut well_box = rect.clone();
+                let mut well_box = rect;
                 expand_box(&mut well_box, tc.layer("diff").enclosure("nwell"));
 
                 elems.push(Element {
@@ -114,7 +114,7 @@ impl Pdk {
                     inner: Shape::Rect(well_box),
                 });
             } else {
-                let mut nsdm_box = rect.clone();
+                let mut nsdm_box = rect;
                 expand_box(&mut nsdm_box, tc.layer("diff").enclosure("nsdm"));
                 elems.push(Element {
                     net: None,
@@ -313,7 +313,7 @@ impl Pdk {
 
         let mut bboxes = Vec::with_capacity(2);
         let mut bbox_map = HashMap::with_capacity(3);
-        bbox_map.insert(ctlay, ct_bbox.clone());
+        bbox_map.insert(ctlay, ct_bbox);
 
         let mut aport = AbstractPort {
             net: net_name.clone(),
@@ -322,7 +322,7 @@ impl Pdk {
 
         for lay_name in [&stack.layers[0], &stack.layers[2]] {
             let lay = layers.keyname(lay_name).unwrap();
-            let mut laybox = ct_bbox.clone();
+            let mut laybox = ct_bbox;
             expand_box(&mut laybox, tc.layer(ctlay_name).enclosure(lay_name));
             expand_box_min_width(&mut laybox, tc.layer(lay_name).width, tc.grid);
             let ose = tc.layer(ctlay_name).one_side_enclosure(lay_name);
@@ -338,7 +338,7 @@ impl Pdk {
                 }
             }
 
-            let shape = Shape::Rect(laybox.clone());
+            let shape = Shape::Rect(laybox);
             aport.shapes.insert(lay, vec![shape.clone()]);
 
             bboxes.push(shape.bbox());
@@ -363,7 +363,7 @@ impl Pdk {
             });
         } else if params.stack == "pdiffc" {
             let diff_rect = rect_from_bbox(&bboxes[1]);
-            let mut psdm_box = diff_rect.clone();
+            let mut psdm_box = diff_rect;
             expand_box(&mut psdm_box, tc.layer("diff").enclosure("psdm"));
             elems.push(Element {
                 net: None,

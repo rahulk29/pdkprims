@@ -1,8 +1,5 @@
-use std::fmt::Display;
-
 use crate::config::Int;
 use layout21::raw::{BoundBox, Point, Rect};
-use serde::{Deserialize, Serialize};
 
 pub fn box_width(b: &mut Rect) -> Int {
     b.p1.x - b.p0.x

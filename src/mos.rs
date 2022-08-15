@@ -1,3 +1,4 @@
+use std::fmt::Write;
 use std::{collections::HashMap, fmt::Display};
 
 use layout21::raw::geom::Dir;
@@ -170,10 +171,11 @@ impl MosParams {
     }
 
     pub fn name(&self) -> String {
-        let mut name = String::from("ptx");
+        let mut name = String::new();
+        write!(&mut name, "ptx").unwrap();
 
         for device in self.devices.iter() {
-            name.push_str(&format!("__{}", device.name()));
+            write!(&mut name, "__{}", device.name()).unwrap();
         }
 
         name
