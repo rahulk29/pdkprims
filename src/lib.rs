@@ -6,6 +6,7 @@ use std::{
 use arcstr::ArcStr;
 use config::TechConfig;
 use contact::{Contact, ContactParams};
+use layout21::raw::Units;
 use layout21::{
     gds21::GdsLibrary,
     raw::{Cell, DepOrder, LayerKey, Layers, LayoutResult, Library},
@@ -102,6 +103,20 @@ impl Pdk {
             layers,
             contacts: Ptr::new(HashMap::new()),
         })
+    }
+
+    pub fn create_lib(&self, name: impl Into<String>) -> Library {
+        Library {
+            name: name.into(),
+            units: self.units(),
+            layers: self.layers(),
+            cells: PtrList::new(),
+        }
+    }
+
+    pub fn units(&self) -> Units {
+        let tc = self.config.read().unwrap();
+        tc.units
     }
 
     pub fn grid(&self) -> Int {
