@@ -53,17 +53,15 @@ impl PdkLib {
         lib.to_gds()
     }
 
-    /// Exports this library to GDS and saves it in the given folder.
+    /// Exports this library to GDS and saves it at the given file path.
     ///
-    /// The filename is given by
-    /// ```text
-    /// format!("{}.gds", &lib.name);
-    /// ```
-    pub fn save_gds(&self, folder: impl AsRef<Path>) -> Result<(), Box<dyn std::error::Error>> {
+    /// Creates the parent directory if it does not already exist.
+    pub fn save_gds(&self, path: impl AsRef<Path>) -> Result<(), Box<dyn std::error::Error>> {
         let gds = self.export_gds()?;
-        std::fs::create_dir_all(folder.as_ref())?;
-        let mut path = folder.as_ref().to_owned();
-        path.push(format!("{}.gds", &self.lib.name));
+        if let Some(parent) = path.as_ref().parent() {
+            std::fs::create_dir_all(parent)?;
+        }
+
         gds.save(&path)?;
 
         Ok(())
