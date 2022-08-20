@@ -41,6 +41,9 @@ pub struct PdkLib {
 }
 
 impl PdkLib {
+    /// Exports this library to GDS structures.
+    ///
+    /// Does not save anything to disk.
     pub fn export_gds(&self) -> LayoutResult<GdsLibrary> {
         let mut lib = Library::new(self.lib.name.clone(), self.pdk.config.read().unwrap().units);
         lib.layers = self.pdk.layers();
@@ -50,13 +53,16 @@ impl PdkLib {
         lib.to_gds()
     }
 
-    pub fn save_gds(&self) -> Result<(), Box<dyn std::error::Error>> {
+    /// Exports this library to GDS and saves it in the given folder.
+    ///
+    /// The filename is given by
+    /// ```text
+    /// format!("{}.gds", &lib.name);
+    /// ```
+    pub fn save_gds(&self, folder: impl AsRef<Path>) -> Result<(), Box<dyn std::error::Error>> {
         let gds = self.export_gds()?;
-        let mut path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-        path.push("..");
-        path.push("_build");
-        std::fs::create_dir_all(&path)?;
-        println!("saving output to {:?}", &path);
+        std::fs::create_dir_all(folder.as_ref())?;
+        let mut path = folder.as_ref().to_owned();
         path.push(format!("{}.gds", &self.lib.name));
         gds.save(&path)?;
 
