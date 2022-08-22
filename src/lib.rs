@@ -67,6 +67,10 @@ impl PdkLib {
         Ok(())
     }
 
+    pub fn cell(&self, name: &str) -> Option<Ptr<Cell>> {
+        self.lib.cell(name)
+    }
+
     pub fn draw_contact(&mut self, params: &ContactParams) -> Ref<Contact> {
         let ct = self.pdk.draw_contact(params);
         self.lib.cells.push(ct.cell.clone());
