@@ -1,5 +1,6 @@
 use std::{collections::HashMap, path::Path};
 
+use layout21::raw::LayoutResult;
 use layout21::{
     gds21::GdsLibrary,
     raw::{Cell, Library},
@@ -20,7 +21,7 @@ fn name_map(lib: &Library) -> HashMap<String, Ptr<Cell>> {
 }
 
 /// Loads GDS file `gds_file` into the given library.
-pub fn load_gds(pdk_lib: &mut PdkLib, gds_file: impl AsRef<Path>) -> anyhow::Result<()> {
+pub fn load_gds(pdk_lib: &mut PdkLib, gds_file: impl AsRef<Path>) -> LayoutResult<()> {
     let lib = GdsLibrary::load(gds_file)?;
     let lib = Library::from_gds(&lib, Some(pdk_lib.pdk.layers.clone()))?;
 

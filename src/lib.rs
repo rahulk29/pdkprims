@@ -3,7 +3,8 @@ use std::{collections::HashMap, path::Path};
 use arcstr::ArcStr;
 use config::TechConfig;
 use contact::{Contact, ContactParams};
-use layout21::raw::Units;
+use layout21::gds21::GdsError;
+use layout21::raw::{LayoutError, Units};
 use layout21::{
     gds21::GdsLibrary,
     raw::{Cell, DepOrder, LayerKey, Layers, LayoutResult, Library},
@@ -37,6 +38,16 @@ pub struct PdkLib {
     pub lib: Library,
 }
 
+#[derive(thiserror::Error, Debug)]
+pub enum Error {
+    #[error("layout error: {0}")]
+    Layout(#[from] LayoutError),
+    #[error("GDS error: {0}")]
+    Gds(#[from] GdsError),
+    #[error("io error: {0}")]
+    Io(#[from] std::io::Error),
+}
+
 impl PdkLib {
     /// Exports this library to GDS structures.
     ///
@@ -53,10 +64,7 @@ impl PdkLib {
     /// Exports this library to GDS and saves it at the given file path.
     ///
     /// Creates the parent directory if it does not already exist.
-    pub fn save_gds(
-        &self,
-        path: impl AsRef<Path>,
-    ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    pub fn save_gds(&self, path: impl AsRef<Path>) -> Result<(), Error> {
         let gds = self.export_gds()?;
         if let Some(parent) = path.as_ref().parent() {
             std::fs::create_dir_all(parent)?;
@@ -155,11 +163,7 @@ impl Pdk {
         Ptr::clone(&self.layers)
     }
 
-    pub fn cell_to_gds(
-        &self,
-        cell: Ptr<Cell>,
-        path: impl AsRef<Path>,
-    ) -> Result<(), Box<dyn std::error::Error>> {
+    pub fn cell_to_gds(&self, cell: Ptr<Cell>, path: impl AsRef<Path>) -> Result<(), Error> {
         let cell_name = {
             let cell = cell.read().unwrap();
             cell.name.to_owned()

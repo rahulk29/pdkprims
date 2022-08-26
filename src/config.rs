@@ -165,13 +165,10 @@ impl LayerConfig {
 #[cfg(all(test, feature = "sky130"))]
 mod tests {
     use super::*;
-    use std::path::PathBuf;
 
     #[test]
     fn test_sky130_design_rules() -> Result<(), Box<dyn std::error::Error>> {
-        let mut p = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-        p.push("../tech/sky130/drc_config.yaml");
-        let tc = TechConfig::load(p)?;
+        let tc = crate::tech::sky130::tech_config();
         let yaml = tc.to_yaml()?;
 
         println!("yaml\n:{}", &yaml);
