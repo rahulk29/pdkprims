@@ -86,11 +86,87 @@ impl Pdk {
             let ct = self.get_contact(&params);
             let bbox = ct.bboxes.get(&layer).unwrap();
 
-            if bbox.p1.x - bbox.p0.x < width {
+            if bbox.p1.x - bbox.p0.x <= width {
                 result = Some(ct);
                 low = mid + 1;
             } else {
                 high = mid;
+            }
+        }
+
+        result
+    }
+
+    /// Gets the largest contact whose boundary on `layer` fits within the provided [`Rect`]'s
+    /// width and height.
+    ///
+    /// Contacts with more than 100x100 units are not supported.
+    pub fn get_contact_within(
+        &self,
+        stack: impl Into<String>,
+        layer: LayerKey,
+        bbox: impl Into<Rect>,
+    ) -> Option<Ref<Contact>> {
+        let mut low_r = 1;
+        let mut high_r = 100;
+        let mut low_c = 1;
+        let mut high_c = 100;
+
+        let stack = stack.into();
+        let bbox = bbox.into();
+        let dir = if bbox.width() > bbox.height() {
+            Dir::Horiz
+        } else {
+            Dir::Vert
+        };
+
+        let mut result;
+
+        loop {
+            if high_r < low_r || high_c < low_c {
+                return None;
+            }
+
+            assert!(high_r >= low_r);
+            assert!(high_c >= low_c);
+
+            let r = (low_r + high_r + 1) / 2;
+            let c = (low_c + high_c + 1) / 2;
+
+            let params = ContactParams::builder()
+                .rows(r)
+                .cols(c)
+                .stack(stack.clone())
+                .dir(dir)
+                .build()
+                .unwrap();
+            let ct = self.get_contact(&params);
+            let outline = ct.bboxes.get(&layer).unwrap();
+
+            match (
+                outline.width() <= bbox.width(),
+                outline.height() <= bbox.height(),
+            ) {
+                (true, true) => {
+                    result = Some(ct);
+                    low_r = r;
+                    low_c = c;
+                    if r == high_r && c == high_c {
+                        break;
+                    }
+                }
+                (true, false) => {
+                    low_c = c;
+                    high_r = r - 1;
+                }
+                (false, true) => {
+                    low_r = r;
+                    high_c = c - 1;
+                }
+                (false, false) => {
+                    high_r = r - 1;
+                    high_c = c - 1;
+                }
             }
         }
 

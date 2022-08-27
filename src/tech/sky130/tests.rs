@@ -1,6 +1,7 @@
 use std::path::{Path, PathBuf};
 
 use layout21::raw::geom::Dir;
+use layout21::raw::{Point, Rect};
 use layout21::{
     raw::{DepOrder, LayerPurpose, Library},
     utils::{Ptr, PtrList},
@@ -104,6 +105,38 @@ fn test_sky130_contact_sized() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
+#[test]
+fn test_sky130_draw_contact_within() -> Result<(), Box<dyn std::error::Error>> {
+    setup()?;
+
+    let dims = [320, 400, 500, 800, 1000, 4000];
+
+    let pdk = super::pdk()?;
+
+    let mut lib = Library::new(
+        "test_sky130_draw_contact_within",
+        pdk.config.read().unwrap().units,
+    );
+    lib.layers = pdk.layers();
+
+    let m2 = pdk.get_layerkey("m2").unwrap();
+
+    for h in dims {
+        for w in dims {
+            let ct = pdk
+                .get_contact_within("via1", m2, Rect::new(Point::zero(), Point::new(w, h)))
+                .unwrap();
+            if lib.cell(&ct.cell.read().unwrap().name).is_none() {
+                lib.cells.push(Ptr::clone(&ct.cell));
+            }
+        }
+    }
+
+    let gds = lib.to_gds()?;
+    gds.save(output("test_sky130_draw_contact_within.gds"))?;
+    Ok(())
+}
+
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 struct LayerPair {
     purpose: LayerPurpose,
@@ -126,11 +159,11 @@ fn test_serialize_layer_purpose() -> Result<(), Box<dyn std::error::Error>> {
 
 fn output(name: impl AsRef<Path>) -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .join("../_build/")
+        .join("target/_tests/gds/")
         .join(name)
 }
 
 fn setup() -> Result<(), Box<dyn std::error::Error>> {
-    std::fs::create_dir_all(PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../_build/"))?;
+    std::fs::create_dir_all(PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("target/_tests/gds/"))?;
     Ok(())
 }
