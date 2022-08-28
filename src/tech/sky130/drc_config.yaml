@@ -406,6 +406,11 @@ stacks:
       - li
       - licon
       - ntap
+  ptap:
+    layers:
+      - li
+      - licon
+      - ptap
   ndiffc:
     layers:
       - li
