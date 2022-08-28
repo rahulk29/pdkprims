@@ -26,6 +26,7 @@ pub mod tech;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Pdk {
+    pub tech: ArcStr,
     pub config: Ptr<TechConfig>,
     pub layers: Ptr<Layers>,
     contacts: Ptr<HashMap<ContactParams, Ref<Contact>>>,
@@ -111,10 +112,11 @@ fn round(a: Int, b: Int) -> Int {
 }
 
 impl Pdk {
-    pub fn new(config: TechConfig) -> LayoutResult<Self> {
+    pub fn new(tech: ArcStr, config: TechConfig) -> LayoutResult<Self> {
         let layers = Ptr::new(config.get_layers()?);
         let config = Ptr::new(config);
         Ok(Self {
+            tech,
             config,
             layers,
             contacts: Ptr::new(HashMap::new()),
@@ -127,6 +129,14 @@ impl Pdk {
             units: self.units(),
             layers: self.layers(),
             cells: PtrList::new(),
+        }
+    }
+
+    pub fn create_pdk_lib(&self, name: impl Into<String>) -> PdkLib {
+        PdkLib {
+            tech: self.tech.clone(),
+            lib: self.create_lib(name),
+            pdk: self.clone(),
         }
     }
 

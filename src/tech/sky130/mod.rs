@@ -33,7 +33,7 @@ pub fn tech_config() -> TechConfig {
 }
 
 pub fn pdk() -> LayoutResult<Pdk> {
-    Pdk::new(tech_config())
+    Pdk::new(arcstr::literal!("sky130"), tech_config())
 }
 
 /// Creates a new [`PdkLib`] with a cell library of the given `name`.
