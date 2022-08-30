@@ -214,7 +214,9 @@ impl Pdk {
                     MosType::Nmos => "ndiffc",
                     MosType::Pmos => "pdiffc",
                 };
-                let ct = self.get_contact_sized(ct_stack, diff, d.width).unwrap();
+                let ct = self
+                    .get_contact_sized(ct_stack, Dir::Horiz, diff, d.width)
+                    .unwrap();
                 let bbox = ct.bboxes.get(&diff).unwrap();
                 let ofsx = (d.width - rect_width(bbox)) / 2;
                 let loc = Point::new(x - bbox.p0.x + ofsx, cy - bbox.p0.y);

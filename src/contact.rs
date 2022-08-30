@@ -65,6 +65,7 @@ impl Pdk {
     pub fn get_contact_sized(
         &self,
         stack: impl Into<String>,
+        dir: Dir,
         layer: LayerKey,
         width: Int,
     ) -> Option<Ref<Contact>> {
@@ -76,17 +77,21 @@ impl Pdk {
 
         while high > low {
             let mid = (high + low) / 2;
+            let (rows, cols) = match dir {
+                Dir::Horiz => (1, mid),
+                Dir::Vert => (mid, 1),
+            };
             let params = ContactParams::builder()
-                .rows(1)
-                .cols(mid)
+                .rows(rows)
+                .cols(cols)
                 .stack(stack.clone())
-                .dir(Dir::Horiz)
+                .dir(!dir)
                 .build()
                 .unwrap();
             let ct = self.get_contact(&params);
             let bbox = ct.bboxes.get(&layer).unwrap();
 
-            if bbox.p1.x - bbox.p0.x <= width {
+            if bbox.span(dir).length() <= width {
                 result = Some(ct);
                 low = mid + 1;
             } else {
