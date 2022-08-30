@@ -85,7 +85,7 @@ impl Pdk {
                 .rows(rows)
                 .cols(cols)
                 .stack(stack.clone())
-                .dir(!dir)
+                .dir(dir)
                 .build()
                 .unwrap();
             let ct = self.get_contact(&params);
