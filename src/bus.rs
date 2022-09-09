@@ -7,8 +7,8 @@ use serde::{Deserialize, Serialize};
 /// Specifies how contacts should be placed on a bus.
 #[derive(Debug, Copy, Clone, Serialize, Deserialize)]
 pub struct ContactPolicy {
-    above: Option<ContactPosition>,
-    below: Option<ContactPosition>,
+    pub above: Option<ContactPosition>,
+    pub below: Option<ContactPosition>,
 }
 
 /// Specifies how contacts should be placed on any given layer.
