@@ -92,7 +92,14 @@ impl PdkLib {
             _ => panic!("unsupported technology: {}", &self.tech),
         }?;
 
-        self.lib.cells.push(ptx.cell.clone());
+        let name = {
+            let cell = ptx.cell.read().unwrap();
+            cell.name.clone()
+        };
+
+        if self.lib.cell(&name).is_none() {
+            self.lib.cells.push(ptx.cell.clone());
+        }
 
         Ok(ptx)
     }
