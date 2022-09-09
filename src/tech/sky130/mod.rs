@@ -449,8 +449,36 @@ impl Pdk {
         }
     }
 
+    /// The name of the via layer connecting metal `i+1` to metal `i`.
+    pub fn via_name(&self, i: LayerIdx) -> &'static str {
+        match i {
+            0 => "mcon",
+            1 => "via",
+            2 => "via2",
+            3 => "via3",
+            4 => "via4",
+            _ => panic!("sky130 has no via layer numbered {}", i),
+        }
+    }
+
+    /// The name of the stack connecting metal `i+1` to metal `i`.
+    pub fn stack_name(&self, layer: LayerIdx) -> &str {
+        match layer {
+            0 => "viali",
+            1 => "via1",
+            2 => "via2",
+            3 => "via3",
+            4 => "via4",
+            _ => panic!("No stack for layer index {}", layer),
+        }
+    }
+
     pub fn metal(&self, i: LayerIdx) -> LayerKey {
         self.get_layerkey(self.metal_name(i)).unwrap()
+    }
+
+    pub fn via(&self, i: LayerIdx) -> LayerKey {
+        self.get_layerkey(self.via_name(i)).unwrap()
     }
 }
 

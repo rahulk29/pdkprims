@@ -66,7 +66,7 @@ mod tests {
         let _ = pdk.licon1();
         let _ = pdk.li1();
         let _ = pdk.met1();
-        let _ = pdk.via();
+        let _ = Sky130Pdk::via(&pdk);
         let _ = pdk.met2();
         let _ = pdk.via2();
         let _ = pdk.met3();
