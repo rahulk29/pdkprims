@@ -42,6 +42,7 @@ pub fn pdk_lib(name: impl Into<String>) -> LayoutResult<PdkLib> {
         tech: arcstr::literal!("sky130"),
         pdk: pdk()?,
         lib: Library::new(name, Units::Nano),
+        ptx: HashMap::new(),
     })
 }
 

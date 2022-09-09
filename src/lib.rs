@@ -37,6 +37,7 @@ pub struct PdkLib {
     pub tech: ArcStr,
     pub pdk: Pdk,
     pub lib: Library,
+    ptx: HashMap<MosParams, Ref<LayoutTransistors>>,
 }
 
 #[derive(thiserror::Error, Debug)]
@@ -87,19 +88,16 @@ impl PdkLib {
     }
 
     pub fn draw_mos(&mut self, params: MosParams) -> MosResult<Ref<LayoutTransistors>> {
+        if let Some(ptx) = self.ptx.get(&params) {
+            return Ok(ptx.clone());
+        }
+
         let ptx = match &*self.tech {
-            "sky130" => self.pdk.draw_sky130_mos(params),
+            "sky130" => self.pdk.draw_sky130_mos(params.clone()),
             _ => panic!("unsupported technology: {}", &self.tech),
         }?;
 
-        let name = {
-            let cell = ptx.cell.read().unwrap();
-            cell.name.clone()
-        };
-
-        if self.lib.cell(&name).is_none() {
-            self.lib.cells.push(ptx.cell.clone());
-        }
+        self.ptx.insert(params, ptx.clone());
 
         Ok(ptx)
     }
@@ -144,6 +142,7 @@ impl Pdk {
             tech: self.tech.clone(),
             lib: self.create_lib(name),
             pdk: self.clone(),
+            ptx: HashMap::new(),
         }
     }
 
