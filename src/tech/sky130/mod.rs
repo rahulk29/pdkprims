@@ -1,11 +1,11 @@
 use std::collections::HashMap;
 use std::sync::Arc;
 
-use layout21::raw::Dir;
 use layout21::raw::{
     Abstract, AbstractPort, BoundBoxTrait, Cell, Element, Instance, LayerKey, LayerPurpose, Layout,
     LayoutResult, Library, Point, Rect, Shape, Units,
 };
+use layout21::raw::{Dir, Span};
 use layout21::utils::Ptr;
 
 use crate::config::{Int, Uint};
@@ -67,10 +67,12 @@ impl Pdk {
         let diff = layers.keyname("diff").unwrap();
 
         let nf = params.fingers();
+        assert!(nf > 0);
 
         // Diff length perpendicular to gates
         let diff_perp =
-            2 * diff_edge_to_gate(&tc) + nf * tc.layer("poly").width + (nf - 1) * finger_space(&tc);
+            2 * diff_edge_to_gate(&tc) + nf * params.length() + (nf - 1) * finger_space(&tc);
+        println!("diff_perp = {diff_perp}");
 
         let mut prev = None;
         let x0 = 0;
@@ -90,10 +92,7 @@ impl Pdk {
 
             diff_xs.push(cx);
 
-            let rect = Rect {
-                p0: Point::new(cx, y0),
-                p1: Point::new(cx + d.width, y0 + diff_perp),
-            };
+            let rect = Rect::new(Point::new(cx, y0), Point::new(cx + d.width, y0 + diff_perp));
 
             if d.mos_type == MosType::Pmos {
                 let mut psdm_box = rect;
@@ -141,7 +140,7 @@ impl Pdk {
             .rows(1)
             .cols(1)
             .dir(Dir::Horiz)
-            .stack("polyc".into())
+            .stack("polyc")
             .build()
             .unwrap();
         let gate_ct = self.get_contact(&gate_ctp);
@@ -157,37 +156,14 @@ impl Pdk {
         // TODO: Need to move gate contacts further away from transistor.
         // There are several relevant design rules, but for now I'll just
         // add a constant offset.
-        let poly_fudge_x = 45;
-        for i in 0..nf {
+        let poly_fudge_x = 60;
+        let mut poly_rects = Vec::with_capacity(nf as usize);
+        for _ in 0..nf {
             let rect = Rect {
                 p0: Point::new(xpoly - poly_fudge_x, ypoly),
                 p1: Point::new(xpoly + wpoly, ypoly + params.length()),
             };
-
-            let ofsx = rect.p0.x - gate_bbox.p1.x;
-            let ofsy = if i % 2 == 0 {
-                rect.p1.y - gate_bbox.p1.y
-            } else {
-                rect.p0.y - gate_bbox.p0.y
-            };
-
-            let ct_ofs = Point::new(ofsx, ofsy);
-            let ct_box = translate(gate_metal_bbox, &ct_ofs);
-            let mut port = AbstractPort::new(format!("gate_{}", i));
-            port.add_shape(gate_metal, Shape::Rect(ct_box));
-            abs.add_port(port);
-            gate_pins.push(ct_box);
-
-            let inst = Instance {
-                inst_name: format!("gate_contact_{}", i),
-                cell: Ptr::clone(&gate_ct.cell),
-                loc: ct_ofs,
-                reflect_vert: false,
-                angle: None,
-            };
-
-            insts.push(inst);
-
+            poly_rects.push(rect);
             elems.push(Element {
                 net: None,
                 layer: poly,
@@ -198,6 +174,55 @@ impl Pdk {
             ypoly += params.length();
             ypoly += finger_space(&tc);
         }
+
+        // Place gate contacts and create gate ports
+        let line = gate_bbox.height();
+        let space = tc.layer("poly").space;
+        let total_contact_len = nf * line + (nf - 1) * space;
+        let gate_span = Span::new(poly_rects[0].p0.y, poly_rects.last().unwrap().p1.y);
+        let contact_span =
+            Span::from_center_span_gridded(gate_span.center(), total_contact_len, self.grid());
+        let npc_bbox = gate_ct.bboxes.get(&self.npc()).unwrap();
+
+        let mut npc_boxes = Vec::new();
+
+        for i in 0..nf {
+            let bot = contact_span.start() + i * (line + space);
+            let rect = poly_rects[i as usize];
+            let ofsx = rect.p0.x - gate_bbox.p1.x;
+            let ofsy = bot - gate_bbox.p0.y;
+
+            let ct_ofs = Point::new(ofsx, ofsy);
+            let ct_box = translate(gate_metal_bbox, &ct_ofs);
+            let mut port = AbstractPort::new(format!("gate_{}", i));
+            port.add_shape(gate_metal, Shape::Rect(ct_box));
+            abs.add_port(port);
+            gate_pins.push(ct_box);
+
+            npc_boxes.push(translate(npc_bbox, &ct_ofs));
+
+            let inst = Instance {
+                inst_name: format!("gate_contact_{}", i),
+                cell: Ptr::clone(&gate_ct.cell),
+                loc: ct_ofs,
+                reflect_vert: false,
+                angle: None,
+            };
+
+            insts.push(inst);
+        }
+
+        let top_npc = npc_boxes.last().unwrap();
+        let npc_merge_rect = Rect::new(
+            Point::new(npc_boxes[0].p0.x, npc_boxes[0].p0.y),
+            Point::new(top_npc.p1.x, top_npc.p1.y),
+        );
+        elems.push(Element {
+            net: None,
+            layer: self.npc(),
+            purpose: LayerPurpose::Drawing,
+            inner: Shape::Rect(npc_merge_rect),
+        });
 
         // Add source/drain contacts
         let mut cy = y0;
@@ -386,6 +411,7 @@ impl Pdk {
         } else if params.stack == "polyc" {
             let mut npc_box = ct_bbox;
             expand_box(&mut npc_box, tc.layer("licon").enclosure("npc"));
+            bbox_map.insert(layers.keyname("npc").unwrap(), npc_box);
             elems.push(Element {
                 net: None,
                 layer: layers.keyname("npc").unwrap(),
