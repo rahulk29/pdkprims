@@ -12,6 +12,7 @@ use crate::{config::Uint, Pdk};
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Serialize, Deserialize, derive_builder::Builder)]
 pub struct ContactParams {
+    #[builder(setter(into))]
     pub stack: String,
     pub rows: Uint,
     pub cols: Uint,

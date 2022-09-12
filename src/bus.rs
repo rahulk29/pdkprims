@@ -23,14 +23,14 @@ pub enum ContactPosition {
 
 impl Pdk {
     /// The minimum spacing between tracks on a bus, assuming minimum sized contacts is used.
-    pub fn bus_min_spacing(&self, metal: LayerIdx, width: Int, strategy: ContactPolicy) -> Int {
+    pub fn bus_min_spacing(&self, metal: LayerIdx, width: Int, policy: ContactPolicy) -> Int {
         use std::cmp::{max, min};
 
         let tc = self.config.read().unwrap();
         let space = tc.layer(self.metal_name(metal)).space;
         let mut min_space = space;
 
-        if let Some(above) = strategy.above {
+        if let Some(above) = policy.above {
             let params = ContactParams::builder()
                 .stack(self.stack_name(metal).to_string())
                 .rows(1)
@@ -55,7 +55,7 @@ impl Pdk {
             }
         }
 
-        if let Some(below) = strategy.below {
+        if let Some(below) = policy.below {
             if metal == 0 {
                 panic!("Cannot contact the lowest metal layer from below ");
             }
