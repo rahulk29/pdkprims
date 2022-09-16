@@ -112,6 +112,8 @@ layers:
         - 20
       - - Label
         - 5
+      - - Pin
+        - 16
   nwell:
     desc: define nwell for placing PMOS transistors
     width: 840
