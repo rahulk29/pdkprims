@@ -385,7 +385,7 @@ impl Pdk {
             let src_layer = if params.stack == "ndiffc" {
                 "diff"
             } else {
-                "ptap"
+                "ntap"
             };
             expand_box(&mut nsdm_box, tc.layer(src_layer).enclosure("nsdm"));
             elems.push(Element {
