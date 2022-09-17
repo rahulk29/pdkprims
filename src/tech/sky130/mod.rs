@@ -394,15 +394,19 @@ impl Pdk {
                 purpose: LayerPurpose::Drawing,
                 inner: Shape::Rect(nsdm_box),
             });
-        } else if params.stack == "pdiffc" || params.stack == "ptap" {
+        } else if params.stack == "ptap" {
+            let mut psdm_box = rect_from_bbox(&bboxes[1]);
+            expand_box(&mut psdm_box, tc.layer("ptap").enclosure("psdm"));
+            elems.push(Element {
+                net: None,
+                layer: layers.keyname("psdm").unwrap(),
+                purpose: LayerPurpose::Drawing,
+                inner: Shape::Rect(psdm_box),
+            });
+        } else if params.stack == "pdiffc" {
             let diff_rect = rect_from_bbox(&bboxes[1]);
             let mut psdm_box = diff_rect;
-            let src_layer = if params.stack == "pdiffc" {
-                "diff"
-            } else {
-                "ptap"
-            };
-            expand_box(&mut psdm_box, tc.layer(src_layer).enclosure("psdm"));
+            expand_box(&mut psdm_box, tc.layer("diff").enclosure("psdm"));
             elems.push(Element {
                 net: None,
                 layer: layers.keyname("psdm").unwrap(),
