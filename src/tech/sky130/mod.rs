@@ -380,19 +380,29 @@ impl Pdk {
             });
         }
 
-        if params.stack == "ndiffc" {
+        if params.stack == "ndiffc" || params.stack == "ntap" {
             let mut nsdm_box = rect_from_bbox(&bboxes[1]);
-            expand_box(&mut nsdm_box, tc.layer("diff").enclosure("nsdm"));
+            let src_layer = if params.stack == "ndiffc" {
+                "diff"
+            } else {
+                "ptap"
+            };
+            expand_box(&mut nsdm_box, tc.layer(src_layer).enclosure("nsdm"));
             elems.push(Element {
                 net: None,
                 layer: layers.keyname("nsdm").unwrap(),
                 purpose: LayerPurpose::Drawing,
                 inner: Shape::Rect(nsdm_box),
             });
-        } else if params.stack == "pdiffc" {
+        } else if params.stack == "pdiffc" || params.stack == "ptap" {
             let diff_rect = rect_from_bbox(&bboxes[1]);
             let mut psdm_box = diff_rect;
-            expand_box(&mut psdm_box, tc.layer("diff").enclosure("psdm"));
+            let src_layer = if params.stack == "pdiffc" {
+                "diff"
+            } else {
+                "ptap"
+            };
+            expand_box(&mut psdm_box, tc.layer(src_layer).enclosure("psdm"));
             elems.push(Element {
                 net: None,
                 layer: layers.keyname("psdm").unwrap(),

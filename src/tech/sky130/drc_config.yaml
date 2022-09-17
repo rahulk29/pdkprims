@@ -94,6 +94,9 @@ layers:
       - layer: nwell
         enclosure: 180
         one_side: false
+      - layer: nsdm
+        enclosure: 125
+        one_side: false
     extensions: []
     layernum: 65
     purposes:
@@ -228,6 +231,9 @@ layers:
     enclosures:
       - layer: pwell
         enclosure: 130
+        one_side: false
+      - layer: psdm
+        enclosure: 125
         one_side: false
     extensions: []
     layernum: 65
