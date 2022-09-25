@@ -81,7 +81,7 @@ impl Pdk {
 
         let mut diff_xs = Vec::new();
 
-        for d in params.devices.iter() {
+        for (j, d) in params.devices.iter().enumerate() {
             if let Some(mt) = prev {
                 if mt != d.mos_type {
                     cx += diff_to_opposite_diff(&tc);
@@ -106,6 +106,10 @@ impl Pdk {
 
                 let mut well_box = rect;
                 expand_box(&mut well_box, tc.layer("diff").enclosure("nwell"));
+
+                let mut port = AbstractPort::new(format!("vpb_{}", j));
+                port.add_shape(layers.keyname("nwell").unwrap(), Shape::Rect(well_box));
+                abs.add_port(port);
 
                 elems.push(Element {
                     net: None,
