@@ -279,6 +279,12 @@ impl LayoutTransistors {
         self.get_port(&format!("sd_{}_{}", i, j))
     }
 
+    pub fn vpb_port(&self, i: Uint) -> Option<AbstractPort> {
+        assert!(i >= 0);
+
+        self.get_port(&format!("vpb_{}", i))
+    }
+
     fn get_port(&self, name: &str) -> Option<AbstractPort> {
         let cell = self.cell.read().unwrap();
         let abs = cell.abs.as_ref().unwrap();
