@@ -101,6 +101,7 @@ impl Pdk {
                 let psdm = layers.keyname("psdm").unwrap();
                 let mut port = AbstractPort::new(format!("psdm_{}", j));
                 port.add_shape(psdm, Shape::Rect(psdm_box));
+                abs.add_port(port);
 
                 elems.push(Element {
                     net: None,
@@ -129,6 +130,7 @@ impl Pdk {
                 let nsdm = layers.keyname("nsdm").unwrap();
                 let mut port = AbstractPort::new(format!("nsdm_{}", j));
                 port.add_shape(nsdm, Shape::Rect(nsdm_box));
+                abs.add_port(port);
 
                 elems.push(Element {
                     net: None,
