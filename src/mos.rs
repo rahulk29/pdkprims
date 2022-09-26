@@ -2,6 +2,7 @@ use std::fmt::Write;
 use std::{collections::HashMap, fmt::Display};
 
 use layout21::raw::geom::Dir;
+use layout21::raw::{BoundBox, BoundBoxTrait};
 use layout21::{
     raw::{AbstractPort, Cell, LayerKey, LayoutError, Rect},
     utils::Ptr,
@@ -263,6 +264,16 @@ pub struct LayoutTransistors {
     /// `gate_pins[i]` is the metal region corresponding to
     /// the `i`'th finger of the transistors. Zero-indexed.
     pub gate_pins: Vec<Rect>,
+
+    /// The number of transistor regions in the layout.
+    ///
+    /// Note that this is NOT the number of fingers.
+    pub num_devices: usize,
+
+    /// The number of fingers in the layout.
+    ///
+    /// Note that this is NOT the number of devices.
+    pub num_fingers: usize,
 }
 
 impl LayoutTransistors {
@@ -283,6 +294,23 @@ impl LayoutTransistors {
         assert!(i >= 0);
 
         self.get_port(&format!("vpb_{}", i))
+    }
+
+    pub fn merged_vpb_port(&self, start: Uint) -> AbstractPort {
+        let mut i = start;
+        let mut bbox = BoundBox::empty();
+        let mut nwell = None;
+
+        while let Some(port) = self.vpb_port(i) {
+            nwell = Some(*port.shapes.keys().next().unwrap());
+            bbox = bbox.union(&port.largest_rect(nwell.unwrap()).unwrap().into());
+            i += 1;
+        }
+
+        let rect = bbox.into_rect();
+        let mut port = AbstractPort::new("vpb");
+        port.add_shape(nwell.unwrap(), layout21::raw::Shape::Rect(rect));
+        port
     }
 
     fn get_port(&self, name: &str) -> Option<AbstractPort> {

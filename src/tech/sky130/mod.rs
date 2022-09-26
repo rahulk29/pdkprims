@@ -288,6 +288,8 @@ impl Pdk {
             gate_metal,
             sd_pins,
             gate_pins,
+            num_fingers: params.devices[0].fingers as usize,
+            num_devices: params.devices.len(),
         };
 
         Ok(Arc::new(transistors))
