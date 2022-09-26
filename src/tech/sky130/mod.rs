@@ -97,9 +97,14 @@ impl Pdk {
             if d.mos_type == MosType::Pmos {
                 let mut psdm_box = rect;
                 expand_box(&mut psdm_box, tc.layer("diff").enclosure("psdm"));
+
+                let psdm = layers.keyname("psdm").unwrap();
+                let mut port = AbstractPort::new(format!("psdm_{}", j));
+                port.add_shape(psdm, Shape::Rect(psdm_box));
+
                 elems.push(Element {
                     net: None,
-                    layer: layers.keyname("psdm").unwrap(),
+                    layer: psdm,
                     purpose: LayerPurpose::Drawing,
                     inner: Shape::Rect(psdm_box),
                 });
@@ -120,9 +125,14 @@ impl Pdk {
             } else {
                 let mut nsdm_box = rect;
                 expand_box(&mut nsdm_box, tc.layer("diff").enclosure("nsdm"));
+
+                let nsdm = layers.keyname("nsdm").unwrap();
+                let mut port = AbstractPort::new(format!("nsdm_{}", j));
+                port.add_shape(nsdm, Shape::Rect(nsdm_box));
+
                 elems.push(Element {
                     net: None,
-                    layer: layers.keyname("nsdm").unwrap(),
+                    layer: nsdm,
                     purpose: LayerPurpose::Drawing,
                     inner: Shape::Rect(nsdm_box),
                 });
