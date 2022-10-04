@@ -81,6 +81,9 @@ impl Pdk {
 
         let mut diff_xs = Vec::new();
 
+        let mut prev_psdm: Option<Rect> = None;
+        let mut prev_nsdm: Option<Rect> = None;
+
         for (j, d) in params.devices.iter().enumerate() {
             if let Some(mt) = prev {
                 if mt != d.mos_type {
@@ -103,12 +106,19 @@ impl Pdk {
                 port.add_shape(psdm, Shape::Rect(psdm_box));
                 abs.add_port(port);
 
+                if let Some(prev_psdm) = prev_psdm {
+                    psdm_box = psdm_box.union(&prev_psdm.into()).into_rect();
+                }
+
                 elems.push(Element {
                     net: None,
                     layer: psdm,
                     purpose: LayerPurpose::Drawing,
                     inner: Shape::Rect(psdm_box),
                 });
+
+                prev_psdm = Some(psdm_box);
+                prev_nsdm = None;
 
                 let mut well_box = rect;
                 expand_box(&mut well_box, tc.layer("diff").enclosure("nwell"));
@@ -131,6 +141,13 @@ impl Pdk {
                 let mut port = AbstractPort::new(format!("nsdm_{}", j));
                 port.add_shape(nsdm, Shape::Rect(nsdm_box));
                 abs.add_port(port);
+
+                if let Some(prev_nsdm) = prev_nsdm {
+                    nsdm_box = nsdm_box.union(&prev_nsdm.into()).into_rect();
+                }
+
+                prev_nsdm = Some(nsdm_box);
+                prev_psdm = None;
 
                 elems.push(Element {
                     net: None,
