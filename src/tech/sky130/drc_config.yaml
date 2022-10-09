@@ -376,6 +376,24 @@ layers:
           - drop
           - 42
         - 42
+  outline:
+    desc: defines standard cell outlines
+    layernum: 236
+    purposes:
+      - - Drawing
+        - 0
+  text:
+    desc: text annotations
+    layernum: 83
+    purposes:
+      - - Drawing
+        - 44
+  standardc:
+    desc: defines standard cell areas
+    layernum: 81
+    purposes:
+      - - Drawing
+        - 4
   pwell:
     desc: empty
     layernum: 64
