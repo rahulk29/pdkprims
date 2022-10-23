@@ -10,6 +10,8 @@ use crate::config::Int;
 use crate::Ref;
 use crate::{config::Uint, Pdk};
 
+pub const MAX_CONTACT_UNITS: isize = 4095;
+
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Serialize, Deserialize, derive_builder::Builder)]
 pub struct ContactParams {
     #[builder(setter(into))]
@@ -71,7 +73,7 @@ impl Pdk {
         width: Int,
     ) -> Option<Ref<Contact>> {
         let mut low = 1;
-        let mut high = 100;
+        let mut high = MAX_CONTACT_UNITS;
         let mut result = None;
 
         let stack = stack.into();
@@ -106,7 +108,7 @@ impl Pdk {
     /// Gets the largest contact whose boundary on `layer` fits within the provided [`Rect`]'s
     /// width and height.
     ///
-    /// Contacts with more than 100x100 units are not supported.
+    /// Contacts with more than [`MAX_CONTACT_UNITS`]x[`MAX_CONTACT_UNITS`] units are not supported.
     pub fn get_contact_within(
         &self,
         stack: impl Into<String>,
@@ -114,9 +116,9 @@ impl Pdk {
         bbox: impl Into<Rect>,
     ) -> Option<Ref<Contact>> {
         let mut low_r = 1;
-        let mut high_r = 100;
+        let mut high_r = MAX_CONTACT_UNITS;
         let mut low_c = 1;
-        let mut high_c = 100;
+        let mut high_c = MAX_CONTACT_UNITS;
 
         let stack = stack.into();
         let bbox = bbox.into();
