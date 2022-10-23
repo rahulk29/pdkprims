@@ -10,7 +10,7 @@ use crate::config::Int;
 use crate::Ref;
 use crate::{config::Uint, Pdk};
 
-pub const MAX_CONTACT_UNITS: isize = 4095;
+pub const MAX_CONTACT_UNITS: isize = 1023;
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Serialize, Deserialize, derive_builder::Builder)]
 pub struct ContactParams {
