@@ -303,7 +303,7 @@ layers:
       - - Pin
         - 16
       - - Named:
-          - text
+          - model
           - 83
         - 83
       - - Named:
