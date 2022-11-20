@@ -72,7 +72,6 @@ impl Pdk {
         // Diff length perpendicular to gates
         let diff_perp =
             2 * diff_edge_to_gate(&tc) + nf * params.length() + (nf - 1) * finger_space(&tc);
-        println!("diff_perp = {diff_perp}");
 
         let mut prev = None;
         let x0 = 0;
