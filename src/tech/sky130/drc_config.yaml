@@ -344,6 +344,12 @@ layers:
     purposes:
       - - Drawing
         - 44
+  lvtn:
+    desc: define low-Vt nmos implants
+    layernum: 125
+    purposes:
+      - - Drawing
+        - 44
   id_sram:
     desc: define memory core cells
     layernum: 81
